@@ -31,8 +31,11 @@ class KieAiClient:
             headers=self._headers(),
             method="POST",
         )
-        resp = urllib.request.urlopen(req)
-        body = json.loads(resp.read())
+        try:
+            resp = urllib.request.urlopen(req)
+            body = json.loads(resp.read())
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"Kie.ai network error: {exc.reason}") from exc
 
         if body.get("code") != 200:
             raise RuntimeError(f"Kie.ai createTask error: {body.get('message', body)}")
@@ -45,9 +48,19 @@ class KieAiClient:
         deadline = time.monotonic() + timeout
 
         while True:
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"Kie.ai task {task_id} timed out after {timeout}s")
+
             req = urllib.request.Request(url, headers=self._headers())
-            resp = urllib.request.urlopen(req)
-            body = json.loads(resp.read())
+            try:
+                resp = urllib.request.urlopen(req)
+                body = json.loads(resp.read())
+            except urllib.error.URLError:
+                # Transient network error — continue polling
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(f"Kie.ai task {task_id} timed out after {timeout}s")
+                time.sleep(interval)
+                continue
 
             if body.get("code") != 200:
                 raise RuntimeError(f"Kie.ai poll error: {body.get('message', body)}")
@@ -62,8 +75,5 @@ class KieAiClient:
 
             if state == "fail":
                 raise RuntimeError(f"Kie.ai task {task_id} failed: {data}")
-
-            if time.monotonic() >= deadline:
-                raise TimeoutError(f"Kie.ai task {task_id} timed out after {timeout}s")
 
             time.sleep(interval)

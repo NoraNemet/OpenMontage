@@ -36,20 +36,13 @@ class TestKieAiClientCreateTask:
             "data": {"taskId": "x"}
         }).encode()
 
-        captured_req = {}
+        with patch("urllib.request.urlopen", return_value=mock_resp) as mock_open:
+            client.create_task("m", {})
 
-        original_Request = urllib.request.Request
-
-        def capture_request(url, data=None, headers=None, method=None):
-            req = original_Request(url, data=data, headers=headers or {}, method=method)
-            captured_req["req"] = req
-            return req
-
-        with patch("urllib.request.Request", side_effect=capture_request):
-            with patch("urllib.request.urlopen", return_value=mock_resp):
-                client.create_task("m", {})
-
-        assert captured_req["req"].get_header("Authorization") == "Bearer test-key"
+        req = mock_open.call_args[0][0]
+        # header_items() returns list of (name, value) tuples, names are title-cased
+        headers = dict(req.header_items())
+        assert headers.get("Authorization") == "Bearer test-key"
 
     def test_raises_on_api_error(self):
         from tools._kie_client import KieAiClient
@@ -98,13 +91,37 @@ class TestKieAiClientPollTask:
         }).encode()
 
         # Return increasing values so deadline is immediately exceeded
-        monotonic_values = iter([0.0, 0.0, 10.0])
+        _calls = [0.0, 0.5, 10.0]
+        call_count = {"n": 0}
+        def fake_monotonic():
+            n = call_count["n"]
+            call_count["n"] += 1
+            return _calls[n] if n < len(_calls) else 999.0
 
         with patch("urllib.request.urlopen", return_value=mock_resp):
             with patch("time.sleep"):
-                with patch("time.monotonic", side_effect=monotonic_values):
+                with patch("time.monotonic", side_effect=fake_monotonic):
                     with pytest.raises(TimeoutError):
                         client.poll_task("abc-123", timeout=1, interval=2)
+
+    def test_returns_url_list_when_result_json_is_dict(self):
+        from tools._kie_client import KieAiClient
+        client = KieAiClient(api_key="test-key")
+
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        # resultJson is already a dict, not a JSON string
+        mock_resp.read.return_value = json.dumps({
+            "code": 200,
+            "data": {
+                "state": "success",
+                "resultJson": {"resultUrls": ["https://cdn.kie.ai/out2.mp3"]}
+            }
+        }).encode()
+
+        with patch("urllib.request.urlopen", return_value=mock_resp):
+            urls = client.poll_task("abc-999", timeout=10, interval=0)
+        assert urls == ["https://cdn.kie.ai/out2.mp3"]
 
     def test_raises_on_fail_state(self):
         from tools._kie_client import KieAiClient
