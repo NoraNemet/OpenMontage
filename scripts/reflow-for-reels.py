@@ -45,7 +45,11 @@ def convert_plan(plan: dict) -> dict:
     result["width"] = 1080
     result["height"] = 1920
     result["layout"] = "vertical"
-    result["scenes"] = [transform_scene(s) for s in plan.get("scenes", [])]
+    # Support both "cuts" (Explainer schema) and legacy "scenes" key
+    if "cuts" in plan:
+        result["cuts"] = [transform_scene(s) for s in plan.get("cuts", [])]
+    else:
+        result["scenes"] = [transform_scene(s) for s in plan.get("scenes", [])]
     return result
 
 
