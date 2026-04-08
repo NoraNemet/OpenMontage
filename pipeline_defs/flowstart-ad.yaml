@@ -1,0 +1,79 @@
+name: flowstart-ad
+version: "1.0"
+description: "Flowstart brand reklám — LinkedIn 16:9 + Instagram Reels 9:16"
+category: generated
+stability: experimental
+
+default_checkpoint_policy: guided
+
+orchestration:
+  mode: executive-producer
+  skill: pipelines/explainer/executive-producer
+  budget_default_usd: 1.00
+  max_revisions_per_stage: 2
+
+style: flowstart
+
+tools_preferred:
+  tts: kie_tts
+  broll: pexels_video
+  infographic: infographic_png
+
+stages:
+  - name: script
+    skill: pipelines/explainer/script-director
+    produces: [script, narration_text]
+    checkpoint_required: true
+    human_approval_default: true
+
+  - name: tts
+    skill: pipelines/explainer/asset-director
+    required_artifacts_in: [narration_text]
+    produces: [narration_audio]
+    checkpoint_required: false
+    human_approval_default: false
+    tools: [kie_tts]
+
+  - name: broll
+    skill: pipelines/explainer/asset-director
+    produces: [broll_clips]
+    checkpoint_required: false
+    human_approval_default: false
+    tools: [pexels_video]
+
+  - name: infographic
+    skill: pipelines/explainer/asset-director
+    produces: [infographic_pngs]
+    checkpoint_required: true
+    human_approval_default: true
+    tools: [infographic_png]
+
+  - name: compose
+    skill: pipelines/explainer/compose-director
+    required_artifacts_in: [narration_audio, broll_clips, infographic_pngs]
+    produces: [scene_plan_linkedin]
+    checkpoint_required: true
+    human_approval_default: true
+
+  - name: dual_render
+    skill: pipelines/explainer/compose-director
+    required_artifacts_in: [scene_plan_linkedin]
+    produces: [video_linkedin, video_reels]
+    checkpoint_required: false
+    human_approval_default: false
+
+compatible_playbooks:
+  recommended: [flowstart]
+  also_works: [clean-professional, flat-motion-graphics]
+
+output:
+  linkedin:
+    composition: Explainer
+    width: 1920
+    height: 1080
+    fps: 30
+  reels:
+    composition: Explainer9x16
+    width: 1080
+    height: 1920
+    fps: 30
