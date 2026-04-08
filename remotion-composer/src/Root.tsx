@@ -93,6 +93,22 @@ export const THEMES: Record<string, ThemeConfig> = {
     captionHighlightColor: "#FFB347",
     captionBackgroundColor: "rgba(10, 10, 26, 0.8)",
   },
+  "flowstart": {
+    primaryColor: "#4F46E5",
+    accentColor: "#6b00b8",
+    backgroundColor: "#ffffff",
+    surfaceColor: "#f8f9ff",
+    textColor: "#1e293b",
+    mutedTextColor: "#64748b",
+    headingFont: "Plus Jakarta Sans",
+    bodyFont: "Inter",
+    monoFont: "JetBrains Mono",
+    chartColors: ["#4F46E5", "#6b00b8", "#a5b4fc", "#c4b5fd", "#e0e7ff", "#1e293b"],
+    springConfig: { damping: 18, stiffness: 120, mass: 1 },
+    transitionDuration: 0.4,
+    captionHighlightColor: "#4F46E5",
+    captionBackgroundColor: "rgba(79,70,229,0.08)",
+  },
 };
 
 // Default theme when none is specified — uses the existing dark style for backwards compatibility
@@ -137,6 +153,20 @@ export const Root: React.FC = () => {
           overlays: [],
           captions: [],
           audio: {},
+        }}
+        calculateMetadata={calculateMetadata}
+      />
+      <Composition
+        id="Explainer9x16"
+        component={Explainer}
+        durationInFrames={30 * 60}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          cuts: [],
+          theme: 'flowstart',
+          layout: 'vertical',
         }}
         calculateMetadata={calculateMetadata}
       />

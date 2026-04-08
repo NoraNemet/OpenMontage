@@ -42,6 +42,7 @@ import { HeroTitle } from "./components/HeroTitle";
 import { AnimeScene } from "./components/AnimeScene";
 import type { CameraMotion } from "./components/AnimeScene";
 import type { ParticleType } from "./components/ParticleOverlay";
+import { InfographicScene } from "./InfographicScene";
 import { resolveTheme, type ThemeConfig, DEFAULT_THEME } from "./Root";
 
 // Load Space Grotesk font for cinematic typography
@@ -241,6 +242,13 @@ interface Cut {
     scale?: number;
     position?: string | { x: number; y: number };
   };
+  // Infographic scene props (type: "infographic")
+  imageUrl?: string;
+  image_url?: string;
+  animationStyle?: string;
+  animation_style?: string;
+  overlayText?: string;
+  overlay_text?: string;
   // Anime scene props (type: "anime_scene")
   images?: string[];
   particles?: ParticleType;
@@ -286,6 +294,7 @@ export interface ExplainerProps {
   overlays?: Overlay[];
   captions?: WordCaption[];
   audio?: AudioConfig;
+  layout?: 'horizontal' | 'vertical';
 }
 
 // ---------------------------------------------------------------------------
@@ -473,6 +482,8 @@ const BackgroundImageLayer: React.FC<{
 };
 
 const SceneRenderer: React.FC<{ cut: Cut; theme: ThemeConfig }> = ({ cut, theme }) => {
+  const { durationInFrames: sceneDurationFrames } = useVideoConfig();
+
   // Wrap component with background image if specified
   const maybeWrapWithBgImage = (element: React.ReactElement) => {
     if (cut.backgroundImage) {
@@ -616,6 +627,18 @@ const SceneRenderer: React.FC<{ cut: Cut; theme: ThemeConfig }> = ({ cut, theme 
     );
   }
 
+  // --- Infographic scene ---
+  if (cut.type === 'infographic') {
+    return (
+      <InfographicScene
+        imageUrl={cut.imageUrl ?? cut.image_url ?? ''}
+        animationStyle={(cut.animationStyle ?? cut.animation_style ?? 'fade-in') as any}
+        durationInFrames={sceneDurationFrames}
+        overlayText={cut.overlayText ?? cut.overlay_text}
+      />
+    );
+  }
+
   // --- Media types (image / video fallback) ---
   const animation = cut.animation || cut.transform?.animation;
 
@@ -672,7 +695,7 @@ const OverlayRenderer: React.FC<{ overlay: Overlay }> = ({ overlay }) => {
 // ---------------------------------------------------------------------------
 
 export const Explainer: React.FC<ExplainerProps> = (props) => {
-  const { cuts, overlays, captions, audio } = props;
+  const { cuts, overlays, captions, audio, layout } = props;
   const { fps, durationInFrames } = useVideoConfig();
 
   // Resolve theme from props — playbook name, theme name, or custom themeConfig
@@ -684,16 +707,18 @@ export const Explainer: React.FC<ExplainerProps> = (props) => {
       <AnimatedBackground theme={theme} />
 
       {/* Layer 1: Visual scenes */}
-      {cuts.map((cut) => {
-        const from = Math.round(cut.in_seconds * fps);
-        const duration = Math.round((cut.out_seconds - cut.in_seconds) * fps);
+      <AbsoluteFill style={{ flexDirection: layout === 'vertical' ? 'column' : 'row' }}>
+        {cuts.map((cut) => {
+          const from = Math.round(cut.in_seconds * fps);
+          const duration = Math.round((cut.out_seconds - cut.in_seconds) * fps);
 
-        return (
-          <Sequence key={cut.id} from={from} durationInFrames={duration}>
-            <SceneRenderer cut={cut} theme={theme} />
-          </Sequence>
-        );
-      })}
+          return (
+            <Sequence key={cut.id} from={from} durationInFrames={duration}>
+              <SceneRenderer cut={cut} theme={theme} />
+            </Sequence>
+          );
+        })}
+      </AbsoluteFill>
 
       {/* Layer 2: Overlays (section titles, stat reveals, hero titles) */}
       {overlays?.map((overlay, i) => {
