@@ -57,6 +57,40 @@ class TestKieTtsExecute:
         assert result.success is False
         assert "API error" in result.error
 
+    def test_duration_seconds_is_nonzero(self):
+        tool = self._make_tool()
+        with patch("tools.audio.kie_tts.KieAiClient") as MockClient:
+            instance = MockClient.return_value
+            instance.create_task.return_value = "task-004"
+            instance.poll_task.return_value = ["https://example.com/out.mp3"]
+            with patch("urllib.request.urlretrieve"):
+                # 450 chars ≈ 100 words → ~40s at speed 1.0
+                result = tool.execute({"text": "a" * 450})
+        assert result.success is True
+        assert result.data["duration_seconds"] > 0
+
+    def test_language_code_passed_to_create_task(self):
+        tool = self._make_tool()
+        with patch("tools.audio.kie_tts.KieAiClient") as MockClient:
+            instance = MockClient.return_value
+            instance.create_task.return_value = "task-005"
+            instance.poll_task.return_value = ["https://example.com/out.mp3"]
+            with patch("urllib.request.urlretrieve"):
+                tool.execute({"text": "Szia", "language_code": "hu"})
+            input_params = instance.create_task.call_args[0][1]
+            assert input_params.get("language_code") == "hu"
+
+    def test_language_code_omitted_when_not_provided(self):
+        tool = self._make_tool()
+        with patch("tools.audio.kie_tts.KieAiClient") as MockClient:
+            instance = MockClient.return_value
+            instance.create_task.return_value = "task-006"
+            instance.poll_task.return_value = ["https://example.com/out.mp3"]
+            with patch("urllib.request.urlretrieve"):
+                tool.execute({"text": "Hi"})
+            input_params = instance.create_task.call_args[0][1]
+            assert "language_code" not in input_params
+
     def test_tool_metadata(self):
         tool = self._make_tool()
         assert tool.name == "kie_tts"

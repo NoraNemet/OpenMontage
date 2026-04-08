@@ -72,11 +72,15 @@ class KieTts(BaseTool):
         voice = inputs.get("voice", "Rachel")
         speed = inputs.get("speed", 1.0)
 
+        language_code = inputs.get("language_code")
         try:
             client = KieAiClient()
+            tts_params = {"text": text, "voice": voice, "speed": speed}
+            if language_code:
+                tts_params["language_code"] = language_code
             task_id = client.create_task(
                 "elevenlabs/text-to-speech-turbo-2-5",
-                {"text": text, "voice": voice, "speed": speed},
+                tts_params,
             )
             urls = client.poll_task(task_id, timeout=120, interval=2)
             if not urls:
@@ -87,9 +91,12 @@ class KieTts(BaseTool):
             out_path = f"/tmp/kie_tts_{key}.mp3"
             urllib.request.urlretrieve(audio_url, out_path)
 
+            # Estimate duration: ~150 wpm at 4.5 chars/word, adjusted for speed
+            estimated_duration = (len(text) / 4.5 / 150) * 60 / max(speed, 0.1)
+
             return ToolResult(
                 success=True,
-                data={"audio_path": out_path, "duration_seconds": 0.0},
+                data={"audio_path": out_path, "duration_seconds": estimated_duration},
                 artifacts=[out_path],
                 error=None,
                 cost_usd=self.estimate_cost(inputs),
