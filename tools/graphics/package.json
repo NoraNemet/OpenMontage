@@ -1,0 +1,9 @@
+{
+  "name": "openmontage-graphics-renderer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Node.js infographic renderer for OpenMontage",
+  "dependencies": {
+    "sharp": "^0.33.0"
+  }
+}
