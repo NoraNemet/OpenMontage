@@ -1,0 +1,92 @@
+identity:
+  name: flowstart
+  category: custom
+  mood: professional, trustworthy, modern
+  pace: fast
+  best_for: saas, b2b, explainer, ad
+
+visual_language:
+  color_palette:
+    primary: ["#4F46E5"]
+    accent: ["#a5b4fc", "#c4b5fd"]
+    background: "#ffffff"
+    text: "#1e293b"
+    muted: "#64748b"
+  composition: "Clean hierarchy with bold headline and breathing whitespace. Charts use primary/accent tones."
+  texture: "Flat with subtle gradient overlays on hero sections."
+
+typography:
+  headings:
+    font: "Plus Jakarta Sans"
+    weight: 800
+    tracking: "-0.02em"
+  body:
+    font: "Inter"
+    weight: 400
+    line_height: 1.6
+  code:
+    font: "JetBrains Mono"
+    weight: 400
+  stat_card:
+    font: "Plus Jakarta Sans"
+    weight: 700
+    size_multiplier: 1.2
+  scale_system: "major_third"
+  weight_matrix:
+    title: 800
+    heading: 700
+    body: 400
+    caption: 400
+
+motion:
+  transitions: ["fade", "fade-slide-up"]
+  animation_style: "spring-based, snappy entrance"
+  pacing_rules:
+    min_scene_hold_seconds: 3.0
+    text_card_hold_seconds: 3.5
+  entrance: "fade-slide-up"
+  exit: "fade"
+
+audio:
+  voice_style: "warm, confident, professional"
+  music_mood: "uplifting, corporate, modern"
+  music_volume: 0.15
+  sfx_style: minimal
+  ducking_threshold_db: -20
+
+asset_generation:
+  image_prompt_prefix: "Clean professional SaaS product, indigo/purple brand colors, whitespace, modern UI"
+  image_negative_prompt: "cluttered, comic, sketch, watermark, dark background, neon"
+  diagram_style: "flat, minimal, indigo accent"
+  consistency_anchors:
+    - "Primary color #4F46E5 (indigo-600)"
+    - "Secondary #6b00b8 (purple)"
+    - "White backgrounds only"
+    - "Plus Jakarta Sans for all headings"
+
+overlays:
+  stat_card:
+    bg: "#f8f9ff"
+    border: "#e0e7ff"
+    radius: 12
+    shadow: "0 2px 8px rgba(79,70,229,0.08)"
+  key_term:
+    bg: "#ede9fe"
+    text: "#4F46E5"
+    radius: 4
+  code_block:
+    bg: "#1e293b"
+    text: "#e2e8f0"
+    highlight: "#4F46E5"
+
+quality_rules:
+  - "Never use more than 3 colors per scene"
+  - "All text must pass WCAG AA contrast on white"
+  - "Chart labels in Inter 400, values in Plus Jakarta Sans 700"
+  - "Max 6 words per headline on mobile (9:16)"
+
+chart_palette: ["#4F46E5", "#6b00b8", "#a5b4fc", "#c4b5fd", "#e0e7ff", "#1e293b"]
+color_rules:
+  harmony_type: analogous
+  contrast_validation: true
+  colorblind_safe: true
