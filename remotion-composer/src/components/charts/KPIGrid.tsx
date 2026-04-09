@@ -47,20 +47,23 @@ export const KPIGrid: React.FC<KPIGridProps> = ({
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  const cols = Math.min(columns, metrics.length);
+  const { width: videoWidth, height: videoHeight } = useVideoConfig();
+  const isPortrait = videoHeight > videoWidth;
+
+  const cols = isPortrait ? Math.min(2, metrics.length) : Math.min(columns, metrics.length);
   const rows = Math.ceil(metrics.length / cols);
 
-  // Grid layout constants (within 1920x1080)
-  const gridPadding = 100;
-  const cardGap = 28;
-  const titleHeight = title ? 120 : 0;
-  const gridTop = 80 + titleHeight;
-  const gridWidth = 1920 - gridPadding * 2;
-  const gridHeight = 1080 - gridTop - 80;
+  // Grid layout constants — responsive to video dimensions
+  const gridPadding = isPortrait ? 60 : 100;
+  const cardGap = isPortrait ? 24 : 28;
+  const titleHeight = title ? (isPortrait ? 100 : 120) : 0;
+  const gridTop = (isPortrait ? 60 : 80) + titleHeight;
+  const gridWidth = videoWidth - gridPadding * 2;
+  const gridHeight = videoHeight - gridTop - (isPortrait ? 60 : 80);
   const cardWidth = (gridWidth - cardGap * (cols - 1)) / cols;
   const cardHeight = Math.min(
     (gridHeight - cardGap * (rows - 1)) / rows,
-    320
+    isPortrait ? 280 : 320
   );
 
   // Center grid vertically
@@ -275,8 +278,9 @@ const KPICardContent: React.FC<KPICardContentProps> = ({
           config: { damping: 18, stiffness: 60 },
         });
 
-  const displayValue = Math.round(metric.value * countProgress);
-  const formattedValue = formatDisplayValue(displayValue, metric.value);
+  const numericValue = Number(metric.value) || 0;
+  const displayValue = Math.round(numericValue * countProgress);
+  const formattedValue = formatDisplayValue(displayValue, numericValue);
 
   // Change indicator animation
   const changeOpacity = interpolate(

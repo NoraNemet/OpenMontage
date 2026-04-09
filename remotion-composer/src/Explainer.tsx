@@ -226,6 +226,8 @@ interface Cut {
   progressSegments?: any[];
   // Hero title props (when used as scene, not overlay)
   heroSubtitle?: string;
+  // CTA flag
+  isCta?: boolean;
   // Styling overrides
   backgroundColor?: string;
   backgroundImage?: string; // AI-generated or stock image rendered behind the component
@@ -510,7 +512,16 @@ const SceneRenderer: React.FC<{ cut: Cut; theme: ThemeConfig }> = ({ cut, theme 
   // Explicit component types — use theme-derived defaults for colors
   if (cut.type === "text_card" && cut.text) {
     return maybeWrapWithBgImage(
-      <TextCard text={cut.text} fontSize={cut.fontSize} color={textColor} backgroundColor={bgColor} />
+      <TextCard
+        text={cut.text}
+        subtitle={cut.subtitle}
+        fontSize={cut.fontSize}
+        color={textColor}
+        backgroundColor={bgColor}
+        accentColor={accent}
+        fontFamily={theme.bodyFont + ", system-ui, sans-serif"}
+        isCta={cut.isCta}
+      />
     );
   }
   if (cut.type === "stat_card" && cut.stat) {
@@ -538,7 +549,14 @@ const SceneRenderer: React.FC<{ cut: Cut; theme: ThemeConfig }> = ({ cut, theme 
   }
   if (cut.type === "hero_title" && cut.text) {
     return maybeWrapWithBgImage(
-      <HeroTitle title={cut.text} subtitle={cut.heroSubtitle || cut.subtitle} />
+      <HeroTitle
+        title={cut.text}
+        subtitle={cut.heroSubtitle || cut.subtitle}
+        accentColor={accent}
+        textColor={textColor}
+        fontFamily={theme.headingFont + ", Inter, system-ui, sans-serif"}
+        backgroundColor={bgColor}
+      />
     );
   }
 
@@ -629,9 +647,14 @@ const SceneRenderer: React.FC<{ cut: Cut; theme: ThemeConfig }> = ({ cut, theme 
 
   // --- Infographic scene ---
   if (cut.type === 'infographic') {
+    const rawUrl = cut.imageUrl ?? cut.image_url ?? '';
+    // Use staticFile for relative paths, resolveAsset for absolute/URLs
+    const resolvedUrl = rawUrl.startsWith('http') || rawUrl.startsWith('data:') || rawUrl.startsWith('file:')
+      ? rawUrl
+      : rawUrl.startsWith('/') ? resolveAsset(rawUrl) : staticFile(rawUrl);
     return (
       <InfographicScene
-        imageUrl={cut.imageUrl ?? cut.image_url ?? ''}
+        imageUrl={resolvedUrl}
         animationStyle={(cut.animationStyle ?? cut.animation_style ?? 'fade-in') as any}
         durationInFrames={sceneDurationFrames}
         overlayText={cut.overlayText ?? cut.overlay_text}
