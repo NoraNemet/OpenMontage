@@ -28,6 +28,37 @@ For each output variant, verify:
 - subtitle legibility,
 - audio consistency.
 
+### 2b. Default Scene Ordering
+
+Follow the same scene ordering rhythm as the explainer pipeline:
+
+```
+1. Opening text (hook/hero_title)
+2. Source media or b-roll
+3. Animated infographic (chart/content_cards)
+4. Source media or b-roll
+5. Animated infographic (chart/content_cards)
+6. CTA (closing)
+```
+
+Adapt for hybrid context: source media replaces pure b-roll where the brief includes original footage.
+
+### 2c. Audio-Video Duration Sync
+
+**Rule: `total_video_duration = audio_duration`**
+
+When narration audio is present, the scene plan timings must match the audio duration exactly. If audio overruns the scene plan, extend the CTA/closing scene. If the gap exceeds 5 seconds, the narration script should be shortened.
+
+### 2d. Text Overflow & Alignment Rules
+
+**CRITICAL: All user-facing text must fit its container.** These rules apply to every scene type.
+
+- **SVG:** Use `<FittedText>` (not raw `<text>`) with explicit `maxWidth` for all labels
+- **HTML:** Use `overflow: hidden` + `textOverflow: ellipsis` on all text containers
+- **Legends/axes:** Label maxWidth = available space - value width - gaps. Never let labels overlap values.
+- **CTA scenes:** Use `text` for headline, `subtitle` for CTA description. Do NOT combine with `\n`.
+- **Assume long text** — Hungarian/German labels are 2-3× English length. Test with ~35 char labels.
+
 ### 3. Keep Audio Coherent
 
 Source dialogue, narration, music, and effects should feel like one mix, not separate layers fighting for space.

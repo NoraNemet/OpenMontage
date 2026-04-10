@@ -5,6 +5,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { FittedText } from "./FittedText";
 
 interface DataPoint {
   x: number;
@@ -359,16 +360,19 @@ export const LineChart: React.FC<LineChartProps> = ({
                     rx={2}
                     fill={color}
                   />
-                  <text
+                  <FittedText
                     x={legendX + 32}
                     y={966}
+                    maxWidth={120}
+                    textAnchor="start"
+                    rotateIfNeeded={false}
                     fill={textColor}
                     fontFamily={fontFamily}
                     fontSize={20}
                     fontWeight={500}
                   >
                     {s.label}
-                  </text>
+                  </FittedText>
                 </g>
               );
             })}

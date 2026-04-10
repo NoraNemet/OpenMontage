@@ -45,7 +45,12 @@ export const TextCard: React.FC<TextCardProps> = ({
     ? 1 + Math.sin(frame / (fps * 0.4)) * 0.02
     : 1;
 
-  if (isCta && subtitle) {
+  // Auto-split: if text contains \n and no subtitle, split into text + subtitle
+  const hasNewline = text.includes("\n");
+  const effectiveText = hasNewline && !subtitle ? text.split("\n")[0] : text;
+  const effectiveSubtitle = hasNewline && !subtitle ? text.split("\n").slice(1).join(" ") : subtitle;
+
+  if (isCta && effectiveSubtitle) {
     // CTA layout: large URL + subtitle + animated button
     return (
       <AbsoluteFill
@@ -76,7 +81,7 @@ export const TextCard: React.FC<TextCardProps> = ({
               letterSpacing: "-0.02em",
             }}
           >
-            {text}
+            {effectiveText}
           </div>
 
           {/* Animated underline */}
@@ -110,7 +115,7 @@ export const TextCard: React.FC<TextCardProps> = ({
               background: accentColor ? `${accentColor}18` : "rgba(255,255,255,0.08)",
             }}
           >
-            {subtitle}
+            {effectiveSubtitle}
           </div>
         </div>
       </AbsoluteFill>
@@ -146,9 +151,9 @@ export const TextCard: React.FC<TextCardProps> = ({
             lineHeight: 1.3,
           }}
         >
-          {text}
+          {effectiveText}
         </div>
-        {subtitle && (
+        {effectiveSubtitle && (
           <div
             style={{
               opacity: btnSpring * 0.75,
@@ -161,7 +166,7 @@ export const TextCard: React.FC<TextCardProps> = ({
               lineHeight: 1.4,
             }}
           >
-            {subtitle}
+            {effectiveSubtitle}
           </div>
         )}
       </div>

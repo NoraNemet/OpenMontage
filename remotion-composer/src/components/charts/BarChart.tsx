@@ -5,6 +5,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { FittedText } from "./FittedText";
 
 interface BarDatum {
   label: string;
@@ -256,18 +257,20 @@ export const BarChart: React.FC<BarChartProps> = ({
               )}
 
               {/* Label */}
-              <text
+              <FittedText
                 x={barX + barWidth / 2}
                 y={chartBottom + 40}
+                maxWidth={barWidth + barGap}
                 textAnchor="middle"
                 fill={textColor}
                 fontFamily={fontFamily}
                 fontWeight={500}
                 fontSize={20}
+                minFontSize={12}
                 opacity={barOpacity}
               >
                 {datum.label}
-              </text>
+              </FittedText>
             </g>
           );
         })}

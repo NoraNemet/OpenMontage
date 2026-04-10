@@ -5,6 +5,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { FittedText } from "./FittedText";
 
 interface PieDatum {
   label: string;
@@ -215,23 +216,26 @@ export const PieChart: React.FC<PieChartProps> = ({
               )}
             >
               {centerValue && (
-                <text
+                <FittedText
                   x={cx}
                   y={centerLabel ? cy - 10 : cy + 10}
+                  maxWidth={innerRadius * 1.8}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fill={textColor}
                   fontFamily={fontFamily}
                   fontWeight={800}
                   fontSize={56}
+                  rotateIfNeeded={false}
                 >
                   {centerValue}
-                </text>
+                </FittedText>
               )}
               {centerLabel && (
-                <text
+                <FittedText
                   x={cx}
                   y={centerValue ? cy + 36 : cy + 10}
+                  maxWidth={innerRadius * 1.8}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fill={textColor}
@@ -239,9 +243,10 @@ export const PieChart: React.FC<PieChartProps> = ({
                   fontWeight={400}
                   fontSize={24}
                   opacity={0.7}
+                  rotateIfNeeded={false}
                 >
                   {centerLabel}
-                </text>
+                </FittedText>
               )}
             </g>
           )}
@@ -268,18 +273,22 @@ export const PieChart: React.FC<PieChartProps> = ({
                     rx={4}
                     fill={slice.color}
                   />
-                  <text
+                  <FittedText
                     x={legendX + 32}
                     y={legendY + 6}
+                    maxWidth={180}
+                    textAnchor="start"
                     fill={textColor}
                     fontFamily={fontFamily}
                     fontSize={22}
                     fontWeight={500}
+                    minFontSize={14}
+                    rotateIfNeeded={false}
                   >
                     {slice.datum.label}
-                  </text>
+                  </FittedText>
                   <text
-                    x={legendX + 32}
+                    x={legendX + 312}
                     y={legendY + 6}
                     fill={textColor}
                     fontFamily={fontFamily}
@@ -287,7 +296,6 @@ export const PieChart: React.FC<PieChartProps> = ({
                     fontWeight={400}
                     opacity={0.6}
                     textAnchor="end"
-                    dx={280}
                   >
                     {slice.percentage.toFixed(1)}%
                   </text>

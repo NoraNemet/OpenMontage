@@ -41,6 +41,48 @@ Based on the edit decisions, pick the rendering approach:
 - Subtitles → Remotion `captions` prop (word-level), NOT SRT burn via FFmpeg
 - Text overlays (CTA, titles) → Remotion `text_card` cut type, NOT AI-generated images
 
+### Step 1b: Default Scene Ordering
+
+When building the scene plan (edit_decisions cuts array), follow this default visual rhythm unless the content explicitly requires a different structure:
+
+```
+1. Opening text — hook/hero_title (grab attention, state the problem)
+2. Pexels b-roll — relevant stock footage supporting the hook
+3. Animated infographic — bar_chart / pie_chart / kpi_grid / content_cards (data/evidence)
+4. Pexels b-roll — transition footage
+5. Animated infographic — content_cards / bar_chart / kpi_grid (solution/results)
+6. CTA — text_card with isCta=true (call to action, closing)
+```
+
+**Rules:**
+- Never put two infographic scenes back-to-back — always separate with b-roll or text
+- B-roll should visually relate to the narration topic at that point
+- Use `content_cards` (type: "content_cards") when the narration covers 3-5 key points that deserve individual cards
+- Use chart types (bar_chart, pie_chart, kpi_grid) for quantitative data
+- The CTA scene is always last
+- For CTA scenes: use `text` for the headline (e.g. URL), `subtitle` for the call-to-action text. Do NOT put both in `text` with `\n`
+
+### Step 1c: Text Overflow & Alignment Rules
+
+**CRITICAL: All user-facing text must fit its container.** These rules apply to every scene type — built-in and custom components.
+
+**SVG components (charts, graphs):**
+- All text labels MUST use the `<FittedText>` component (from `components/charts/FittedText.tsx`) instead of raw `<text>`
+- Always pass `maxWidth` calculated from the available space minus adjacent elements (values, percentages, icons)
+- For legend rows: label `maxWidth` = total row width - swatch - value text width - gaps
+- For axis labels: `maxWidth` = tick spacing (axis length / tick count)
+- Set `rotateIfNeeded={false}` for legends and horizontal labels where rotation looks bad
+
+**HTML components (cards, grids, text scenes):**
+- All text containers MUST have: `overflow: "hidden"`, `textOverflow: "ellipsis"`, `maxWidth: "100%"`
+- Use `whiteSpace: "nowrap"` for single-line elements (KPI values, labels, titles)
+- Use `lineHeight` + fixed `height` or `maxHeight` for multi-line elements
+
+**General:**
+- Never assume user text is short — Hungarian/German labels are 2-3× longer than English
+- Test with worst-case: "Meeting előkészítés és szervezés" (~35 chars) as a label
+- Adjacent text elements (label + value) must have explicit gap — never rely on text being "short enough"
+
 ### Step 2: Audio Acquisition (Narration, Music, Subtitles)
 
 Before rendering, present the user with audio options and get their preferences.
@@ -80,8 +122,20 @@ Before rendering, present the user with audio options and get their preferences.
        'instructions': '<voice direction matching video tone>',
        'output_path': 'path/to/narration.mp3',
    })
-   # CRITICAL: Check result.data['audio_duration_seconds'] vs video duration
-   # If narration exceeds video by >1s: shorten script and regenerate
+   # CRITICAL: Audio-video duration sync
+   # Rule: total_video_duration = audio_duration
+   audio_duration = result.data['audio_duration_seconds']
+
+   # Adjust scene plan to match audio duration:
+   # 1. Calculate total scene duration from cuts
+   # 2. If audio_duration > total_scene_duration:
+   #    → Extend the CTA/closing scene to fill the gap
+   #    → If gap > 5s: WARNING — narration is too long, consider shortening
+   # 3. If audio_duration < total_scene_duration:
+   #    → Proportionally shrink non-CTA scenes to match
+   # 4. Update all cut in_seconds/out_seconds to reflect new durations
+   # The Remotion calculateMetadata() derives video length from max(cuts.out_seconds),
+   # so the scene plan timings ARE the video duration.
    ```
 
 3. **Download background music:**

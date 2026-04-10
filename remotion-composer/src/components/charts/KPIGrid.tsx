@@ -102,6 +102,10 @@ export const KPIGrid: React.FC<KPIGridProps> = ({
             fontFamily,
             opacity:
               spring({ frame, fps, config: { damping: 20 } }) * fadeOut,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            padding: "0 60px",
           }}
         >
           {title}
@@ -169,6 +173,8 @@ export const KPIGrid: React.FC<KPIGridProps> = ({
                 justifyContent: "center",
                 alignItems: "center",
                 padding: 24,
+                boxSizing: "border-box",
+                overflow: "hidden",
                 opacity: cardOpacity * fadeOut,
                 transform: `translateY(${slideY}px)`,
                 boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
@@ -215,6 +221,8 @@ export const KPIGrid: React.FC<KPIGridProps> = ({
               justifyContent: "center",
               alignItems: "center",
               padding: 24,
+              boxSizing: "border-box",
+              overflow: "hidden",
               opacity: cardOpacity * fadeOut,
               transform: `scale(${cardScale})`,
               boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
@@ -312,6 +320,12 @@ const KPICardContent: React.FC<KPICardContentProps> = ({
           color: accentColor,
           fontFamily,
           lineHeight: 1.1,
+          width: "100%",
+          maxWidth: "100%",
+          textAlign: "center",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
       >
         {metric.prefix || ""}
@@ -328,6 +342,12 @@ const KPICardContent: React.FC<KPICardContentProps> = ({
           fontFamily,
           marginTop: 8,
           opacity: 0.8,
+          width: "100%",
+          maxWidth: "100%",
+          textAlign: "center",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
       >
         {metric.label}

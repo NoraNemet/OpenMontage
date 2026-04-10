@@ -42,6 +42,7 @@ import { HeroTitle } from "./components/HeroTitle";
 import { AnimeScene } from "./components/AnimeScene";
 import type { CameraMotion } from "./components/AnimeScene";
 import type { ParticleType } from "./components/ParticleOverlay";
+import { ContentCards, type ContentCard } from "./components/ContentCards";
 import { InfographicScene } from "./InfographicScene";
 import { resolveTheme, type ThemeConfig, DEFAULT_THEME } from "./Root";
 
@@ -187,7 +188,7 @@ const AnimatedBackground: React.FC<{ theme: ThemeConfig }> = ({ theme }) => {
 
 interface Cut {
   id: string;
-  source: string;
+  source?: string;
   in_seconds: number;
   out_seconds: number;
   layer?: string;
@@ -260,6 +261,10 @@ interface Cut {
   vignette?: boolean;
   lightingFrom?: string;
   lightingTo?: string;
+  // ContentCards props (type: "content_cards")
+  cards?: ContentCard[];
+  layout?: "grid" | "stack";
+  cardBackgroundColor?: string;
 }
 
 interface Overlay {
@@ -658,6 +663,23 @@ const SceneRenderer: React.FC<{ cut: Cut; theme: ThemeConfig }> = ({ cut, theme 
         animationStyle={(cut.animationStyle ?? cut.animation_style ?? 'fade-in') as any}
         durationInFrames={sceneDurationFrames}
         overlayText={cut.overlayText ?? cut.overlay_text}
+      />
+    );
+  }
+
+  // --- Content cards scene ---
+  if (cut.type === "content_cards" && cut.cards && cut.cards.length > 0) {
+    return maybeWrapWithBgImage(
+      <ContentCards
+        cards={cut.cards}
+        title={cut.title}
+        layout={cut.layout}
+        fontFamily={theme.bodyFont + ", system-ui, sans-serif"}
+        textColor={textColor}
+        backgroundColor={bgColor}
+        cardBackgroundColor={cut.cardBackgroundColor || theme.surfaceColor}
+        accentColor={accent}
+        colors={cut.chartColors || theme.chartColors}
       />
     );
   }
